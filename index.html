@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Corner Pizza Eforie Nord — Pizza la cuptor cu lemne, paste de casă, grill și burgeri. Livrare rapidă 30 minute. Program 09:00–23:00 zilnic. Din 2005.">
+<title>Corner Pizza · Eforie Nord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#8c0d1a;
+  --red-deep:#5e0710;
+  --red-bright:#c0182a;
+  --gold:#d4af37;
+  --gold-soft:#e8c95a;
+  --cream:#f7f1e6;
+  --ink:#1a0c0d;
+  --ink-soft:#2a1416;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--ink);
+  color:var(--cream);
+  overflow-x:hidden;
+  line-height:1.6;
+  cursor:none;
+}
+h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif}
+a{color:inherit;text-decoration:none}
+.gold{color:var(--gold)}
+.container{max-width:1180px;margin:0 auto;padding:0 28px}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--gold);font-weight:500;margin-bottom:18px;
+}
+.divider{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 auto 14px}
+.divider span{height:1px;width:54px;background:linear-gradient(90deg,transparent,var(--gold))}
+.divider span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.divider em{color:var(--gold);font-size:1.1rem;font-style:normal}
+
+/* ── CURSOR ─────────────────────────────── */
+#cur{
+  position:fixed;top:0;left:0;
+  width:13px;height:13px;
+  border:1.5px solid var(--gold);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:9999;
+  /* NO transform here — GSAP handles centering via xPercent/yPercent */
+  transition:width .2s,height .2s,background .2s;
+  will-change:transform;
+}
+#cur.big{width:36px;height:36px;background:rgba(212,175,55,.12);}
+@media(hover:none){#cur{display:none}body{cursor:auto}}
+
+/* ── NAV ─────────────────────────────────── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  padding:20px 0;transition:.4s;
+  background:linear-gradient(180deg,rgba(20,8,9,.75),transparent);
+}
+header.scrolled{
+  background:rgba(20,8,9,.96);
+  box-shadow:0 1px 0 rgba(212,175,55,.25);
+  padding:13px 0;
+}
+nav{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{
+  width:42px;height:42px;border:1.5px solid var(--gold);border-radius:50%;
+  display:grid;place-items:center;color:var(--gold);font-family:'Cormorant Garamond',serif;
+  font-weight:700;font-size:1.35rem;flex-shrink:0;
+}
+.brand b{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;letter-spacing:.04em}
+.brand small{display:block;font-size:.58rem;letter-spacing:.34em;color:var(--gold);text-transform:uppercase}
+.nav-links{display:flex;gap:34px;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase}
+.nav-links a{position:relative;padding:4px 0;opacity:.85;transition:.3s}
+.nav-links a:after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--gold);transition:.3s}
+.nav-links a:hover{opacity:1}
+.nav-links a:hover:after{width:100%}
+.btn{
+  display:inline-block;padding:13px 30px;font-size:.74rem;letter-spacing:.2em;
+  text-transform:uppercase;border:1px solid var(--gold);color:var(--gold);
+  transition:.35s;cursor:none;background:transparent;font-family:'Montserrat',sans-serif;
+}
+.btn:hover{background:var(--gold);color:var(--ink)}
+.btn-solid{background:var(--gold);color:var(--ink)}
+.btn-solid:hover{background:var(--gold-soft);border-color:var(--gold-soft)}
+.burger{display:none;flex-direction:column;gap:5px;cursor:none;background:none;border:none;padding:4px}
+.burger span{width:26px;height:2px;background:var(--gold);display:block;transition:.3s}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* Mobile nav overlay */
+#mobNav{
+  display:none;position:fixed;inset:0;z-index:49;
+  background:rgba(20,8,9,.97);
+  flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+  opacity:0;transition:opacity .3s;
+}
+#mobNav.open{display:flex;opacity:1}
+#mobNav a{font-family:'Cormorant Garamond',serif;font-size:2.2rem;letter-spacing:.04em;opacity:.85;transition:.3s}
+#mobNav a:hover{color:var(--gold);opacity:1}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;position:relative;
+  background:
+    radial-gradient(circle at 65% 35%,rgba(192,24,42,.5),transparent 55%),
+    linear-gradient(135deg,var(--red-deep),var(--ink) 72%);
+  overflow:hidden;
+}
+.hero:before{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(212,175,55,.06) 1px,transparent 1px);
+  background-size:26px 26px;opacity:.6;
+}
+.hero-inner{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1fr 420px;
+  align-items:center;gap:4rem;width:100%;
+}
+.hero-text h1{font-size:clamp(3rem,8vw,6rem);line-height:1;font-weight:600;margin:8px 0 22px}
+.hero-text h1 em{font-style:italic;color:var(--gold)}
+.hero-text h1 strong{font-style:normal;color:var(--red-bright)}
+.hero-text p{font-size:1rem;max-width:460px;color:rgba(247,241,230,.78);font-weight:300;margin-bottom:36px}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+.scroll-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;letter-spacing:.32em;color:var(--gold);text-transform:uppercase;z-index:2;
+}
+.scroll-hint:after{
+  content:"";display:block;width:1px;height:32px;
+  background:linear-gradient(var(--gold),transparent);margin:10px auto 0;
+}
+
+/* ── 3D PIZZA (hero right) ───────────────── */
+.pizza-scene{
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:380px;
+}
+.pizza-float{
+  animation:pizzaFloat 5.5s ease-in-out infinite;
+  position:relative;
+}
+@keyframes pizzaFloat{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(-22px)}
+}
+.pizza-3d{
+  animation:pizzaTilt 5.5s ease-in-out infinite;
+  transform-origin:center center;
+}
+@keyframes pizzaTilt{
+  0%,100%{transform:perspective(680px) rotateX(22deg) rotateY(-8deg)}
+  25%{transform:perspective(680px) rotateX(17deg) rotateY(0deg)}
+  50%{transform:perspective(680px) rotateX(14deg) rotateY(8deg)}
+  75%{transform:perspective(680px) rotateX(18deg) rotateY(2deg)}
+}
+.pizza-svg{
+  width:300px;height:256px;
+  filter:drop-shadow(0 14px 28px rgba(0,0,0,.65));
+  display:block;
+}
+.pizza-floor{
+  width:200px;height:28px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,0,0,.45) 0%,transparent 70%);
+  margin-top:8px;
+  animation:floorAnim 5.5s ease-in-out infinite;
+}
+@keyframes floorAnim{
+  0%,100%{transform:scaleX(1);opacity:.55}
+  50%{transform:scaleX(.78);opacity:.25}
+}
+
+/* Badge 20+ ani */
+.badge-20{
+  position:absolute;
+  top:0px;right:-10px;
+  width:88px;height:88px;border-radius:50%;
+  background:var(--gold);color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:badgeSpin 28s linear infinite;
+  box-shadow:0 4px 20px rgba(212,175,55,.4);
+}
+@keyframes badgeSpin{to{transform:rotate(360deg)}}
+.b20-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;font-weight:700;line-height:1;
+}
+.b20-txt{
+  font-size:7px;text-transform:uppercase;letter-spacing:.1em;
+  text-align:center;line-height:1.35;margin-top:2px;font-weight:600;
+}
+
+/* ── SECTIONS general ────────────────────── */
+section{padding:110px 0}
+.section-head{text-align:center;max-width:640px;margin:0 auto 64px}
+.section-head h2{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;line-height:1.05}
+.section-head p{color:rgba(247,241,230,.65);font-weight:300;margin-top:14px}
+
+/* ── DESPRE ──────────────────────────────── */
+.about{background:linear-gradient(180deg,var(--ink),var(--ink-soft))}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.about-text h2{font-size:clamp(2rem,4.5vw,3rem);font-weight:600;margin:10px 0 20px;line-height:1.08}
+.about-text p{color:rgba(247,241,230,.78);font-weight:300;margin-bottom:18px}
+.about-stats{display:flex;gap:40px;margin-top:32px;flex-wrap:wrap}
+.about-stats div b{font-family:'Cormorant Garamond',serif;font-size:2.6rem;color:var(--gold);display:block;line-height:1}
+.about-stats div span{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+.about-visual{
+  aspect-ratio:4/5;border:1px solid rgba(212,175,55,.4);position:relative;
+  background:radial-gradient(circle at 50% 35%,var(--red-bright),var(--red-deep) 70%);
+  display:grid;place-items:center;overflow:hidden;
+}
+.about-visual:before{content:"";position:absolute;inset:14px;border:1px solid rgba(247,241,230,.18)}
+.about-visual .emoji{font-size:7rem;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5))}
+.about-visual .cap{
+  position:absolute;bottom:22px;
+  font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);
+}
+
+/* ── OFERTĂ 3+1 ──────────────────────────── */
+.offer{
+  background:
+    radial-gradient(circle at 50% 50%,rgba(192,24,42,.35),transparent 60%),
+    var(--ink-soft);
+  padding:100px 0;
+}
+.offer-inner{
+  max-width:780px;margin:0 auto;text-align:center;
+}
+.offer-inner h2{font-size:clamp(2.5rem,6vw,4.8rem);font-weight:700;line-height:.95;margin:10px 0 22px}
+.offer-inner h2 em{font-style:italic;color:var(--gold)}
+.offer-inner h2 strong{color:var(--red-bright);font-style:normal}
+.offer-inner p{
+  font-size:.95rem;color:rgba(247,241,230,.7);font-weight:300;
+  max-width:520px;margin:0 auto 36px;line-height:1.75;
+}
+.offer-details{
+  display:flex;justify-content:center;gap:32px;margin-bottom:38px;flex-wrap:wrap;
+}
+.od{
+  display:flex;align-items:center;gap:10px;
+  font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,241,230,.65);
+}
+.od em{color:var(--gold);font-style:normal;font-size:1.2rem}
+
+/* ── MENIU ───────────────────────────────── */
+.menu{
+  background:
+    radial-gradient(circle at 15% 0%,rgba(140,13,26,.6),transparent 45%),
+    var(--ink);
+}
+.menu-tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:50px}
+.menu-tabs button{
+  background:transparent;border:1px solid rgba(212,175,55,.35);color:var(--cream);
+  padding:11px 22px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  font-family:'Montserrat',sans-serif;cursor:none;transition:.3s;
+}
+.menu-tabs button.active,
+.menu-tabs button:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.menu-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:0 56px;
+  max-width:980px;margin:0 auto;
+}
+.menu-cat{display:none}
+.menu-cat.show{display:contents}
+.dish{
+  display:flex;align-items:baseline;gap:14px;padding:18px 0;
+  border-bottom:1px dashed rgba(212,175,55,.2);
+}
+.dish .info{flex:1}
+.dish h3{font-size:1.42rem;font-weight:600;display:inline;line-height:1}
+.dish .tag{
+  font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink);background:var(--gold);padding:2px 7px;
+  margin-left:8px;vertical-align:middle;
+}
+.dish p{font-size:.8rem;color:rgba(247,241,230,.55);font-weight:300;margin-top:4px}
+.dish .dots{flex:1;border-bottom:1px dotted rgba(212,175,55,.35);align-self:flex-end;margin-bottom:6px;min-width:20px}
+.dish .price{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);font-weight:600;white-space:nowrap}
+.menu-note{text-align:center;margin-top:48px;font-size:.78rem;color:rgba(247,241,230,.5);font-weight:300}
+
+/* ── GALERIE ─────────────────────────────── */
+.gallery{background:var(--ink-soft)}
+.gal-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:14px}
+.gal-item{
+  position:relative;overflow:hidden;border:1px solid rgba(212,175,55,.25);
+  display:grid;place-items:center;font-size:3.4rem;
+  background:linear-gradient(135deg,var(--red),var(--red-deep));transition:.5s;cursor:none;
+}
+.gal-item:nth-child(3n+2){background:linear-gradient(135deg,var(--red-bright),var(--red))}
+.gal-item.big{grid-column:span 2;grid-row:span 2;font-size:6rem}
+.gal-item .lbl{
+  position:absolute;bottom:0;left:0;right:0;padding:14px;
+  font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+  background:linear-gradient(transparent,rgba(0,0,0,.7));opacity:0;transition:.4s;
+}
+.gal-item:hover{transform:scale(1.02)}
+.gal-item:hover .lbl{opacity:1}
+
+/* ── LIVRARE ─────────────────────────────── */
+.delivery{background:linear-gradient(180deg,var(--ink),var(--ink-soft))}
+.delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.delivery-info h2{font-size:clamp(2rem,4.5vw,3rem);font-weight:600;margin-bottom:26px}
+.zone-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;border-bottom:1px solid rgba(212,175,55,.18);
+}
+.zone-row .zone-ico{color:var(--gold);font-size:1rem;width:26px;text-align:center;flex-shrink:0}
+.zone-name-wrap{flex:1;padding-left:14px}
+.zone-name-wrap b{display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.zone-name-wrap p{font-weight:300;color:rgba(247,241,230,.8);font-size:.9rem}
+.zone-price{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem;color:var(--gold);font-weight:600;white-space:nowrap;
+}
+.zone-price.free{color:#6dbf80}
+.prog-card{
+  border:1px solid rgba(212,175,55,.4);padding:44px;
+  background:radial-gradient(circle at 60% 40%,var(--red),var(--red-deep));
+  display:flex;flex-direction:column;justify-content:center;
+}
+.prog-card .eyebrow{margin-bottom:12px}
+.prog-time{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3rem,7vw,5.5rem);font-weight:600;color:#fff;
+  line-height:1;letter-spacing:-.02em;margin-bottom:6px;
+}
+.prog-days{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(247,241,230,.6);margin-bottom:28px}
+.prog-divider{width:48px;height:1px;background:var(--gold);opacity:.5;margin-bottom:22px}
+.happy-block{
+  background:rgba(0,0,0,.25);padding:16px 20px;
+  border-left:2px solid var(--gold);
+}
+.happy-title{
+  font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;
+}
+.happy-text{font-size:.85rem;font-weight:300;color:rgba(247,241,230,.75);line-height:1.55}
+
+/* ── CONTACT ─────────────────────────────── */
+.contact{background:linear-gradient(180deg,var(--ink-soft),var(--red-deep))}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.contact-info h2{font-size:clamp(2rem,4.5vw,3rem);font-weight:600;margin-bottom:26px}
+.info-row{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid rgba(212,175,55,.18)}
+.info-row .ico{color:var(--gold);font-size:1.3rem;width:30px;text-align:center}
+.info-row b{display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.info-row p{font-weight:300;color:rgba(247,241,230,.85)}
+.map{
+  border:1px solid rgba(212,175,55,.4);position:relative;min-height:340px;
+  background:
+    linear-gradient(135deg,rgba(20,8,9,.4),rgba(20,8,9,.1)),
+    repeating-linear-gradient(45deg,rgba(212,175,55,.05) 0 2px,transparent 2px 22px),
+    radial-gradient(circle at 60% 40%,var(--red),var(--red-deep));
+  display:grid;place-items:center;text-align:center;
+}
+.map .pin{font-size:3rem;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.map p{margin-top:8px;font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.reserve{margin-top:30px;display:flex;gap:14px;flex-wrap:wrap}
+
+/* ── FOOTER ──────────────────────────────── */
+footer{
+  background:var(--ink);padding:50px 0 34px;
+  text-align:center;border-top:1px solid rgba(212,175,55,.2);
+}
+footer .brand{justify-content:center;margin-bottom:18px}
+.socials{display:flex;gap:20px;justify-content:center;margin:18px 0;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase}
+.socials a{color:var(--gold);opacity:.85;transition:.3s}
+.socials a:hover{opacity:1}
+footer small{display:block;color:rgba(247,241,230,.45);font-size:.7rem;letter-spacing:.1em;margin-top:14px}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media(max-width:960px){
+  .nav-links{display:none}
+  .burger{display:flex}
+  .hero-inner{grid-template-columns:1fr;gap:3rem}
+  .pizza-scene{display:none}
+  .about-grid,.contact-grid,.delivery-grid{grid-template-columns:1fr;gap:40px}
+  .menu-grid{grid-template-columns:1fr}
+  .gal-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px}
+  .gal-item.big{font-size:4rem}
+  section{padding:80px 0}
+}
+@media(max-width:600px){
+  .about-stats{gap:24px}
+  .offer-details{gap:16px}
+  .hero-text h1{font-size:3rem}
+}
+
+/* ── FOCUS ───────────────────────────────── */
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur" aria-hidden="true"></div>
+
+<!-- MOBILE NAV -->
+<div id="mobNav" aria-label="Navigare mobilă" role="dialog">
+  <a href="#hero">Acasă</a>
+  <a href="#about">Despre</a>
+  <a href="#oferta">Ofertă</a>
+  <a href="#menu">Meniu</a>
+  <a href="#gallery">Galerie</a>
+  <a href="#livrare">Livrare</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<!-- NAV -->
+<header id="hdr">
+  <div class="container">
+    <nav>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">C</div>
+        <div><b>Corner Pizza</b><small>Eforie Nord</small></div>
+      </div>
+      <div class="nav-links">
+        <a href="#about">Despre</a>
+        <a href="#oferta">Ofertă</a>
+        <a href="#menu">Meniu</a>
+        <a href="#gallery">Galerie</a>
+        <a href="#livrare">Livrare</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <a href="#contact" class="btn btn-solid">Comandă acum</a>
+      <button class="burger" id="burgerBtn" aria-label="Meniu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <div class="eyebrow">Pizzerie artizanală · Din 2005</div>
+      <h1>Pizza la <em>foc</em><br>de lemne,<br>la tine <strong>acasă</strong>.</h1>
+      <p>Cuptorul nostru cu lemne arde de peste 20 de ani. Pizza, paste de casă, grill și burgeri — livrate în 30 de minute în Eforie Nord și împrejurimi.</p>
+      <div class="hero-cta">
+        <a href="#menu" class="btn btn-solid">Vezi meniul</a>
+        <a href="#oferta" class="btn">Oferta 3 + 1</a>
+      </div>
+    </div>
+
+    <!-- 3D PIZZA ANIMATĂ -->
+    <div class="pizza-scene" aria-hidden="true">
+      <div class="pizza-float">
+        <div class="pizza-3d">
+          <svg class="pizza-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="gCrust" cx="50%" cy="100%" r="80%">
+                <stop offset="0%" stop-color="#B05520"/>
+                <stop offset="100%" stop-color="#5C2404"/>
+              </radialGradient>
+              <radialGradient id="gSauce" cx="50%" cy="85%" r="75%">
+                <stop offset="0%" stop-color="#D42020"/>
+                <stop offset="100%" stop-color="#8C0808"/>
+              </radialGradient>
+              <radialGradient id="gCheese" cx="50%" cy="70%" r="70%">
+                <stop offset="0%" stop-color="#FAD040"/>
+                <stop offset="100%" stop-color="#E8A818"/>
+              </radialGradient>
+              <filter id="fShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="rgba(0,0,0,.65)"/>
+              </filter>
+            </defs>
+
+            <!-- Depth shadow (slice duplicate offset behind) -->
+            <path d="M207,289 L62,77 A258,258 0 0,1 352,77 Z" fill="#1A0404" opacity=".7"/>
+
+            <!-- === PIZZA SLICE (filter applied to group) === -->
+            <g filter="url(#fShadow)">
+              <!-- Crust outer -->
+              <path d="M200,282 L54,72 A258,258 0 0,1 346,72 Z" fill="url(#gCrust)"/>
+
+              <!-- Crust burn spots -->
+              <circle cx="96"  cy="74" r="11" fill="#2A0C02" opacity=".55"/>
+              <circle cx="294" cy="76" r="9"  fill="#2A0C02" opacity=".48"/>
+              <circle cx="186" cy="68" r="6"  fill="#2A0C02" opacity=".42"/>
+              <circle cx="240" cy="70" r="8"  fill="#2A0C02" opacity=".38"/>
+
+              <!-- Crust top highlight / shine -->
+              <path d="M64,67 A258,258 0 0,1 200,20"
+                fill="none" stroke="rgba(255,210,140,.42)" stroke-width="14" stroke-linecap="round"/>
+              <path d="M200,20 A258,258 0 0,1 336,67"
+                fill="none" stroke="rgba(255,210,140,.22)" stroke-width="9" stroke-linecap="round"/>
+
+              <!-- Sauce -->
+              <path d="M200,265 L76,84 A228,228 0 0,1 324,84 Z" fill="url(#gSauce)"/>
+
+              <!-- Cheese -->
+              <path d="M200,250 L96,98 A204,204 0 0,1 304,98 Z" fill="url(#gCheese)"/>
+
+              <!-- Cheese blobs at edges (melted) -->
+              <ellipse cx="126" cy="102" rx="22" ry="13" fill="#F8CC30" transform="rotate(-12,126,102)"/>
+              <ellipse cx="276" cy="100" rx="20" ry="12" fill="#F8CC30" transform="rotate(10,276,100)"/>
+              <ellipse cx="200" cy="108" rx="16" ry="10" fill="#FBD840"/>
+
+              <!-- Mozzarella blobs (white irregular circles) -->
+              <circle cx="156" cy="140" r="16" fill="rgba(255,255,255,.92)"/>
+              <circle cx="244" cy="134" r="14" fill="rgba(255,255,255,.90)"/>
+              <circle cx="200" cy="168" r="13" fill="rgba(255,255,255,.88)"/>
+              <circle cx="160" cy="183" r="12" fill="rgba(255,255,255,.85)"/>
+              <circle cx="240" cy="178" r="12" fill="rgba(255,255,255,.83)"/>
+              <circle cx="200" cy="214" r="10" fill="rgba(255,255,255,.80)"/>
+
+              <!-- Mozzarella highlights -->
+              <circle cx="151" cy="135" r="6" fill="rgba(255,255,255,.6)"/>
+              <circle cx="238" cy="129" r="5" fill="rgba(255,255,255,.55)"/>
+              <circle cx="195" cy="163" r="5" fill="rgba(255,255,255,.5)"/>
+
+              <!-- Basil leaves (dark green ellipses) -->
+              <ellipse cx="148" cy="156" rx="14" ry="8" fill="#246B28" transform="rotate(-20,148,156)"/>
+              <ellipse cx="254" cy="150" rx="13" ry="7" fill="#246B28" transform="rotate(16,254,150)"/>
+              <ellipse cx="200" cy="196" rx="12" ry="7" fill="#246B28" transform="rotate(-5,200,196)"/>
+
+              <!-- Basil leaf midrib -->
+              <line x1="141" y1="157" x2="156" y2="154" stroke="#1A5020" stroke-width="1.5" opacity=".7"/>
+              <line x1="247" y1="151" x2="262" y2="148" stroke="#1A5020" stroke-width="1.5" opacity=".7"/>
+
+              <!-- Small tomato bits -->
+              <circle cx="178" cy="128" r="5" fill="#C83020" opacity=".88"/>
+              <circle cx="222" cy="155" r="4" fill="#C83020" opacity=".82"/>
+              <circle cx="175" cy="205" r="4" fill="#C83020" opacity=".76"/>
+              <circle cx="226" cy="210" r="3" fill="#C83020" opacity=".72"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 20+ ANI BADGE – rămâne și se rotește -->
+      <div class="badge-20" aria-label="20 plus ani de tradiție">
+        <div class="b20-num">20+</div>
+        <div class="b20-txt">Ani de<br>tradiție</div>
+      </div>
+
+      <!-- Shadow pe podea -->
+      <div class="pizza-floor"></div>
+    </div>
+  </div>
+  <div class="scroll-hint">Descoperă</div>
+</section>
+
+<!-- DESPRE NOI -->
+<section class="about" id="about">
+  <div class="container about-grid">
+    <div class="about-text">
+      <div class="eyebrow">Povestea noastră</div>
+      <h2>Pasiune italiană,<br>spirit de litoral.</h2>
+      <p>La Corner Pizza credem că o pizza extraordinară începe cu răbdare și ingrediente de calitate. Aluatul nostru este copt în cuptor cu lemne la peste 400°C și completat cu roșii San Marzano, mozzarella fior di latte și ulei de măsline extravirgin.</p>
+      <p>Pastele le frământăm zilnic în casă. Carnea vine proaspătă de la furnizori locali. Fiecare preparat poartă amprenta celor 20 de ani de experiență — de la prima pizza scoasă din cuptor până azi.</p>
+      <div class="about-stats">
+        <div><b>20+</b><span>Ani tradiție</span></div>
+        <div><b>400°</b><span>Cuptor cu lemne</span></div>
+        <div><b>30′</b><span>Livrare rapidă</span></div>
+      </div>
+    </div>
+    <div class="about-visual">
+      <div class="emoji">🍕</div>
+      <div class="cap">Cuptor cu lemne</div>
+    </div>
+  </div>
+</section>
+
+<!-- OFERTĂ 3+1 -->
+<section class="offer" id="oferta">
+  <div class="container offer-inner">
+    <div class="divider"><span></span><em>✦</em><span></span></div>
+    <div class="eyebrow">Ofertă specială</div>
+    <h2>3 pizza +<br><em>1</em> din <strong>partea casei.</strong></h2>
+    <p>Comandă trei pizza și primești una la alegere gratuită. Oferta Happy Time se aplică Luni–Vineri, între orele 11:00–15:00, pentru orice sortiment din meniu.</p>
+    <div class="offer-details">
+      <div class="od"><em>🍕</em> Orice sortiment</div>
+      <div class="od"><em>🕐</em> 11:00–15:00 · Luni–Vineri</div>
+      <div class="od"><em>🛵</em> Livrare gratuită Eforie Nord</div>
+    </div>
+    <a href="tel:+40000000000" class="btn btn-solid">Sună și comandă acum</a>
+  </div>
+</section>
+
+<!-- MENIU -->
+<section class="menu" id="menu">
+  <div class="container">
+    <div class="section-head">
+      <div class="divider"><span></span><em>✦</em><span></span></div>
+      <div class="eyebrow">Selecția noastră</div>
+      <h2>Meniul complet</h2>
+      <p>Preparate gătite zilnic cu ingrediente proaspete — de la cuptor cu lemne până la grătar și paste de casă.</p>
+    </div>
+
+    <div class="menu-tabs" role="tablist" aria-label="Categorii meniu">
+      <button class="active" data-cat="pizza"     role="tab" aria-selected="true">Pizza</button>
+      <button data-cat="paste"    role="tab">Paste</button>
+      <button data-cat="grill"    role="tab">Grill</button>
+      <button data-cat="burgeri"  role="tab">Burgeri</button>
+      <button data-cat="salate"   role="tab">Salate</button>
+      <button data-cat="micDejun" role="tab">Mic dejun</button>
+      <button data-cat="desert"   role="tab">Desert</button>
+    </div>
+
+    <div class="menu-grid" role="tabpanel">
+      <!-- PIZZA -->
+      <div class="menu-cat show" data-cat="pizza">
+        <div class="dish"><div class="info"><h3>Margherita</h3><p>Sos San Marzano, mozzarella fior di latte, busuioc proaspăt</p></div><div class="dots"></div><div class="price">de la 25 lei</div></div>
+        <div class="dish"><div class="info"><h3>Quattro Formaggi</h3><p>Mozzarella, gorgonzola, parmezan, brie — cuptor cu lemne</p></div><div class="dots"></div><div class="price">de la 35 lei</div></div>
+        <div class="dish"><div class="info"><h3>Prosciutto e Rucola</h3><p>Șuncă crudă, rucola, mozzarella, roșii cherry, parmezan ras</p></div><div class="dots"></div><div class="price">de la 38 lei</div></div>
+        <div class="dish"><div class="info"><h3>Diavola Piccante</h3><p>Salamino picant, ardei iute, mozzarella, sos de roșii</p></div><div class="dots"></div><div class="price">de la 33 lei</div></div>
+        <div class="dish"><div class="info"><h3>Veggie Supremă</h3><span class="tag">Vegetarian</span><p>Legume de sezon la cuptor, mozzarella, ulei de măsline, cimbru</p></div><div class="dots"></div><div class="price">de la 28 lei</div></div>
+        <div class="dish"><div class="info"><h3>Aglio e Olio</h3><p>Usturoi caramelizat, ulei EVOO, parmezan, rozmarin, fără sos</p></div><div class="dots"></div><div class="price">de la 27 lei</div></div>
+      </div>
+      <!-- PASTE -->
+      <div class="menu-cat" data-cat="paste">
+        <div class="dish"><div class="info"><h3>Carbonara de casă</h3><span class="tag">Casă</span><p>Tagliatelle proaspete, guanciale, gălbenuș, pecorino, piper negru</p></div><div class="dots"></div><div class="price">de la 30 lei</div></div>
+        <div class="dish"><div class="info"><h3>Arrabiata</h3><p>Penne, roșii San Marzano, usturoi, ardei iute, busuioc</p></div><div class="dots"></div><div class="price">de la 26 lei</div></div>
+        <div class="dish"><div class="info"><h3>Pesto Genovese</h3><span class="tag">Casă</span><p>Paste de casă, pesto proaspăt, pin nuts, parmezan</p></div><div class="dots"></div><div class="price">de la 28 lei</div></div>
+        <div class="dish"><div class="info"><h3>Bolognese tradițional</h3><p>Carne de vită, sos lent de roșii, vin roșu, cimbru</p></div><div class="dots"></div><div class="price">de la 32 lei</div></div>
+        <div class="dish"><div class="info"><h3>Paste cu fructe de mare</h3><p>Spaghetti, crevete, scoici, usturoi, vin alb, ulei EVOO</p></div><div class="dots"></div><div class="price">de la 42 lei</div></div>
+      </div>
+      <!-- GRILL -->
+      <div class="menu-cat" data-cat="grill">
+        <div class="dish"><div class="info"><h3>Pui cu ierburi</h3><p>Piept marinat cu usturoi, ierburi proaspete, lămâie — la grătar</p></div><div class="dots"></div><div class="price">de la 32 lei</div></div>
+        <div class="dish"><div class="info"><h3>Coastă de porc BBQ</h3><p>Glaze de casă, 8 ore marinare, servit cu cartofi wedges</p></div><div class="dots"></div><div class="price">de la 45 lei</div></div>
+        <div class="dish"><div class="info"><h3>Meniu grill complet</h3><span class="tag">Complet</span><p>Pui + porc + cartofi prăjiți + salată casei + sos ales</p></div><div class="dots"></div><div class="price">de la 58 lei</div></div>
+        <div class="dish"><div class="info"><h3>Frigărui mixte</h3><p>Pui, porc, ardei, ceapă roșie — servite cu tzatziki de casă</p></div><div class="dots"></div><div class="price">de la 38 lei</div></div>
+        <div class="dish"><div class="info"><h3>Pește la grătar</h3><p>File de doradă sau biban, lămâie, capere, unt de ierburi</p></div><div class="dots"></div><div class="price">de la 48 lei</div></div>
+      </div>
+      <!-- BURGERI -->
+      <div class="menu-cat" data-cat="burgeri">
+        <div class="dish"><div class="info"><h3>Classic Corner</h3><p>Carne de vită 160g, cheddar, salată, roșii, castraveți, sos secret</p></div><div class="dots"></div><div class="price">de la 34 lei</div></div>
+        <div class="dish"><div class="info"><h3>Smoky BBQ</h3><p>Carne de vită, sos BBQ de casă, ceapă caramelizată, bacon crocant</p></div><div class="dots"></div><div class="price">de la 38 lei</div></div>
+        <div class="dish"><div class="info"><h3>Crispy Chicken</h3><p>Pui crocant în panko, coleslaw de casă, jalapeño, mayo cu usturoi</p></div><div class="dots"></div><div class="price">de la 32 lei</div></div>
+        <div class="dish"><div class="info"><h3>Veggie Burger</h3><span class="tag">Vegetarian</span><p>Pateu de năut și legume coapte, avocado, rucola, muștar Dijon</p></div><div class="dots"></div><div class="price">de la 28 lei</div></div>
+        <div class="dish"><div class="info"><h3>Double Smash</h3><p>Două patties smashed 80g, cheddar dublu, murături, sos special</p></div><div class="dots"></div><div class="price">de la 42 lei</div></div>
+      </div>
+      <!-- SALATE -->
+      <div class="menu-cat" data-cat="salate">
+        <div class="dish"><div class="info"><h3>Salată grecească</h3><p>Roșii, castravete, feta PDO, măsline kalamata, ceapă roșie, oregano</p></div><div class="dots"></div><div class="price">de la 22 lei</div></div>
+        <div class="dish"><div class="info"><h3>Caesar cu pui</h3><p>Romaine, pui la grătar, croutons, parmezan ras, dressing Caesar</p></div><div class="dots"></div><div class="price">de la 26 lei</div></div>
+        <div class="dish"><div class="info"><h3>Caprese</h3><p>Mozzarella de bivoliță, roșii heirloom, busuioc, ulei EVOO, sare de mare</p></div><div class="dots"></div><div class="price">de la 24 lei</div></div>
+        <div class="dish"><div class="info"><h3>Salată casei</h3><span class="tag">Casă</span><p>Mix de verdețuri, roșii, porumb, morcov, ridichi, dressing de casă</p></div><div class="dots"></div><div class="price">de la 18 lei</div></div>
+      </div>
+      <!-- MIC DEJUN -->
+      <div class="menu-cat" data-cat="micDejun">
+        <div class="dish"><div class="info"><h3>Clătite cu Nutella</h3><p>Clătite fine gratinate, Nutella, banană, frișcă bătută, cacao</p></div><div class="dots"></div><div class="price">de la 18 lei</div></div>
+        <div class="dish"><div class="info"><h3>Omletă franțuzească</h3><p>3 ouă, brânză topită, șuncă, ierburi — servită cu pâine prăjită</p></div><div class="dots"></div><div class="price">de la 16 lei</div></div>
+        <div class="dish"><div class="info"><h3>Croissant cu șuncă</h3><p>Croissant crocant, șuncă de calitate, cheddar, ou poché opțional</p></div><div class="dots"></div><div class="price">de la 14 lei</div></div>
+        <div class="dish"><div class="info"><h3>Clătite cu fructe</h3><p>Clătite subțiri, fructe de sezon, miere, iaurt grecesc</p></div><div class="dots"></div><div class="price">de la 20 lei</div></div>
+      </div>
+      <!-- DESERT -->
+      <div class="menu-cat" data-cat="desert">
+        <div class="dish"><div class="info"><h3>Tiramisu clasic</h3><p>Mascarpone, espresso, savoiardi, cacao — rețetă originală italiană</p></div><div class="dots"></div><div class="price">de la 20 lei</div></div>
+        <div class="dish"><div class="info"><h3>Papanași tradiționali</h3><span class="tag">Tradițional</span><p>Papanași fierți, smântână grasă, dulceață de vișine sau afine</p></div><div class="dots"></div><div class="price">de la 16 lei</div></div>
+        <div class="dish"><div class="info"><h3>Fondant de ciocolată</h3><p>Inimă caldă de ciocolată 70%, frișcă proaspătă, fistic</p></div><div class="dots"></div><div class="price">de la 22 lei</div></div>
+        <div class="dish"><div class="info"><h3>Panna cotta</h3><p>Cremă de vanilie, coulis de fructe de pădure, mentă proaspătă</p></div><div class="dots"></div><div class="price">de la 18 lei</div></div>
+      </div>
+    </div>
+    <p class="menu-note">Meniul complet și alergenii sunt disponibili la cerere · Prețurile pot varia în funcție de dimensiune</p>
+  </div>
+</section>
+
+<!-- GALERIE -->
+<section class="gallery" id="gallery">
+  <div class="container">
+    <div class="section-head">
+      <div class="divider"><span></span><em>✦</em><span></span></div>
+      <div class="eyebrow">Atmosferă</div>
+      <h2>Galerie</h2>
+    </div>
+    <div class="gal-grid">
+      <div class="gal-item big">🍕<div class="lbl">Pizza la cuptor cu lemne</div></div>
+      <div class="gal-item">🔥<div class="lbl">Cuptor pe vatră</div></div>
+      <div class="gal-item">🍝<div class="lbl">Paste de casă</div></div>
+      <div class="gal-item">🌊<div class="lbl">Litoral — Eforie Nord</div></div>
+      <div class="gal-item">🧀<div class="lbl">Ingrediente proaspete</div></div>
+      <div class="gal-item">🍔<div class="lbl">Burgeri artizanali</div></div>
+      <div class="gal-item">🥗<div class="lbl">Salate proaspete</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVRARE -->
+<section class="delivery" id="livrare">
+  <div class="container">
+    <div class="section-head">
+      <div class="divider"><span></span><em>✦</em><span></span></div>
+      <div class="eyebrow">Livrare rapidă</div>
+      <h2>Livrăm în 30 de minute</h2>
+      <p>Comanda ta ajunge caldă și perfectă direct la ușa ta, oriunde în Eforie Nord și localitățile vecine.</p>
+    </div>
+    <div class="delivery-grid">
+      <div class="delivery-info">
+        <h2>Zone de livrare</h2>
+        <div class="zone-row">
+          <div class="zone-ico">📍</div>
+          <div class="zone-name-wrap"><b>Eforie Nord</b><p>Livrare fără taxă suplimentară</p></div>
+          <div class="zone-price free">Gratuit</div>
+        </div>
+        <div class="zone-row">
+          <div class="zone-ico">📍</div>
+          <div class="zone-name-wrap"><b>Eforie Sud</b><p>Taxă de livrare</p></div>
+          <div class="zone-price">+10 lei</div>
+        </div>
+        <div class="zone-row">
+          <div class="zone-ico">📍</div>
+          <div class="zone-name-wrap"><b>Tuzla</b><p>Taxă de livrare</p></div>
+          <div class="zone-price">+10 lei</div>
+        </div>
+        <div class="zone-row">
+          <div class="zone-ico">📍</div>
+          <div class="zone-name-wrap"><b>Techirghiol</b><p>Taxă de livrare</p></div>
+          <div class="zone-price">+10 lei</div>
+        </div>
+        <div class="zone-row">
+          <div class="zone-ico">📍</div>
+          <div class="zone-name-wrap"><b>Agigea · Lazu · Agigea Port</b><p>Taxă de livrare</p></div>
+          <div class="zone-price">+10 lei</div>
+        </div>
+      </div>
+      <div class="prog-card">
+        <div class="eyebrow">Program de funcționare</div>
+        <div class="prog-time">09 – 23</div>
+        <div class="prog-days">Luni – Duminică · Inclusiv sărbători</div>
+        <div class="prog-divider"></div>
+        <div class="happy-block">
+          <div class="happy-title">Happy Time</div>
+          <div class="happy-text">Luni – Vineri, 11:00 – 15:00<br>3 pizza comandate + 1 gratuită din partea casei</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-info">
+      <div class="eyebrow">Te așteptăm</div>
+      <h2>Vizitează-ne</h2>
+      <div class="info-row">
+        <div class="ico">📍</div>
+        <div><b>Adresă</b><p>Eforie Nord, Constanța, România</p></div>
+      </div>
+      <div class="info-row">
+        <div class="ico">🕒</div>
+        <div><b>Program</b><p>Luni – Duminică · 09:00 – 23:00</p></div>
+      </div>
+      <div class="info-row">
+        <div class="ico">📞</div>
+        <div><b>Telefon și comenzi</b><p>+40 000 000 000</p></div>
+      </div>
+      <div class="info-row">
+        <div class="ico">🛵</div>
+        <div><b>Livrare</b><p>Eforie Nord (gratuit) · Eforie Sud, Tuzla, Techirghiol (+10 lei)</p></div>
+      </div>
+      <div class="reserve">
+        <a href="tel:+40000000000" class="btn btn-solid">Sună acum</a>
+        <a href="#menu" class="btn">Vezi meniul</a>
+      </div>
+    </div>
+    <div class="map">
+      <div>
+        <div class="pin">📍</div>
+        <p>Eforie Nord · La câțiva pași de plajă</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">C</div>
+      <div><b>Corner Pizza</b><small>Eforie Nord</small></div>
+    </div>
+    <div class="socials">
+      <a href="#">Instagram</a>
+      <a href="#">Facebook</a>
+      <a href="#">TikTok</a>
+    </div>
+    <small>© 2025 Corner Pizza · Eforie Nord, Constanța. Toate drepturile rezervate.</small>
+  </div>
+</footer>
+
+<script>
+/* ── CURSOR (FIX: xPercent/yPercent — fără conflict CSS transform) ── */
+(function(){
+  var c = document.getElementById('cur');
+  if(!window.matchMedia('(hover:hover)').matches) return;
+  var x=0,y=0,tx=0,ty=0;
+  /* Setam centering o singura data */
+  c.style.marginLeft = '-6.5px';
+  c.style.marginTop  = '-6.5px';
+  window.addEventListener('mousemove',function(e){tx=e.clientX;ty=e.clientY},{passive:true});
+  (function loop(){
+    x+=(tx-x)*0.18; y+=(ty-y)*0.18;
+    c.style.transform='translate('+x+'px,'+y+'px)';
+    requestAnimationFrame(loop);
+  })();
+  var sel='a,button,.gal-item,.dish,.zone-row';
+  document.addEventListener('mouseover',function(e){if(e.target.closest(sel))c.classList.add('big')});
+  document.addEventListener('mouseout', function(e){if(e.target.closest(sel))c.classList.remove('big')});
+})();
+
+/* ── NAV scroll ─────────────────────────── */
+var hdr=document.getElementById('hdr');
+window.addEventListener('scroll',function(){
+  hdr.classList.toggle('scrolled',window.scrollY>40);
+},{passive:true});
+
+/* ── MOBILE NAV ─────────────────────────── */
+var burgerBtn=document.getElementById('burgerBtn');
+var mobNav=document.getElementById('mobNav');
+burgerBtn.addEventListener('click',function(){
+  var open=mobNav.classList.toggle('open');
+  burgerBtn.classList.toggle('open',open);
+  burgerBtn.setAttribute('aria-expanded',open);
+  document.body.style.overflow=open?'hidden':'';
+});
+mobNav.querySelectorAll('a').forEach(function(a){
+  a.addEventListener('click',function(){
+    mobNav.classList.remove('open');
+    burgerBtn.classList.remove('open');
+    burgerBtn.setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+  });
+});
+
+/* ── MENU TABS ──────────────────────────── */
+document.querySelectorAll('.menu-tabs button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.menu-tabs button').forEach(function(b){
+      b.classList.remove('active');
+      b.setAttribute('aria-selected','false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
+    var cat=btn.dataset.cat;
+    document.querySelectorAll('.menu-cat').forEach(function(c){
+      c.classList.toggle('show',c.dataset.cat===cat);
+    });
+  });
+});
+</script>
+</body>
+</html>
